@@ -19,14 +19,16 @@ Informed search strategies must be tested using at least 2 heuristics. Additiona
 
 It is expected from each group to present two programs. The first one, verifiable in linux/unix environment, reads initial state of a puzzle from standard input and on standard output presents the solution found - sequence of actions solving the puzzle. It is assumed, that letter 'L' denotes a move of a piece having freedom to the left, R to the right, U up, and D down. The program must be parametrised using following command line arguments.
 
-### Command line arguments:
-| --- | --------------------------- | ------------------------- |
-|     | -b/--bfs _order_            | Breadth-first search      |
-|     | -d/--dfs _order_            | Depth-first search        |
-|     | -i/--idfs _order_           | Iterative deepenening DFS |
-|     | -h/--bf _id_of_heurisic_    | Best-first strategy       |
-|     | -a/--astar _id_of_heurisic_ | A* strategy               |
-|     | -s/--sma _id_of_heurisic_   | SMA* strategy             |
+
+| Argument      | Syntax                  | Description               |
+|---------------|-------------------------|---------------------------|
+| `-b`, `--bfs` | `-b <order>` or `--bfs <order>` | Executes a Breadth-First Search (BFS) strategy. |
+| `-d`, `--dfs` | `-d <order>` or `--dfs <order>` | Executes a Depth-First Search (DFS) strategy. |
+| `-i`, `--idfs` | `-i <order>` or `--idfs <order>` | Executes an Iterative Deepening DFS (IDFS) strategy. |
+| `-h`, `--bf` | `-h <id_of_heuristic>` or `--bf <id_of_heuristic>` | Executes a Best-First search strategy, using the specified heuristic. |
+| `-a`, `--astar` | `-a <id_of_heuristic>` or `--astar <id_of_heuristic>` | Executes an A* search strategy, using the specified heuristic. |
+| `-s`, `--sma` | `-s <id_of_heuristic>` or `--sma <id_of_heuristic>` | Executes an SMA* search strategy, using the specified heuristic. |
+
 
 Where _order_ is a permutation of a set {'L','R','U','D'} defining an order in which successors of given state are processed, e.g. string DULR means the following search order: down, up, left, right. If _order_ starts with 'R' it should be random (each node has random neighborhood search order).
 
