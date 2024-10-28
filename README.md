@@ -2,7 +2,7 @@
 
 "Fifteen puzzle" can be described as a frame with embedded 15 pieces. They can be moved as there is one piece missing in the puzzle and the frame has size 4x4. The goal of the game is to move pieces inside frame in such a way to achieve ordered state, e.g. from initial state:
 
-![[Pasted image 20241021114739.png]]
+![Pasted image 20241021114739](https://github.com/user-attachments/assets/3440c87a-7c23-4e79-8224-68332b5e0f90)
 #### Problem and task
 
 The task presented to groups is to write a program that will solve the puzzle, which mean it will find a sequence of actions that transforms initial state (given as input at program startup) to the final pattern thus solving the puzzle  
