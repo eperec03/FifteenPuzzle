@@ -1,4 +1,4 @@
-#### Fifteen puzzle
+# Fifteen puzzle
 
 "Fifteen puzzle" can be described as a frame with embedded 15 pieces. They can be moved as there is one piece missing in the puzzle and the frame has size 4x4. The goal of the game is to move pieces inside frame in such a way to achieve ordered state, e.g. from initial state:
 
