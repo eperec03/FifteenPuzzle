@@ -65,7 +65,8 @@ def bfs(puzzle):
     initial_state = puzzle.initial_state
     goal_state = puzzle.goal_state
     empty_tile = puzzle.empty_tile
-
+    #queue almacenará los estados del rompecabezas en un momento específico.
+    '''deque crea una cola que permite agregar y remover elementos eficientemente desde ambos extremos'''
     queue = deque([(initial_state, empty_tile, [], None)])  # Agregar el último movimiento
     visited = set()
     visited.add(tuple(map(tuple, initial_state)))
@@ -135,8 +136,10 @@ def main():
 
     #Parsear argumentos de linea de comandos
     #argparse.ArgumentParser(...): Aquí se crea un nuevo objeto ArgumentParser. Este objeto se usa para manejar los argumentos que se pasan al programa desde la línea de comandos. Argumento -h o --help, lo que le dará información sobre cómo usar el programa
+    #El objeto parser que creamos se encarga de definr y gestionar los argumentos que el programa recibe en la línea de comandoss
     parser = argparse.ArgumentParser(description='Resuelve el rompecabezas de 15.')
-    parser.add_argument('-b', '--bfs', help='Búsqueda en anchura', action='store_true')
+    #add_argument(...) permite especificar los argumentos, sus nombres (corto y largo), la función que tienen, y cómo se deben interpretar.
+    parser.add_argument('-b', '--bfs', help='Búsqueda en anchura', action='store_true') #tipo booleano--store_true
     parser.add_argument('-d', '--dfs', help='Búsqueda en profundidad', action='store_true')
     parser.add_argument('-i', '--idfs', help='Búsqueda con profundización iterativa', action='store_true')
     parser.add_argument('-f', '--bf', help='Búsqueda best-first', type=int)
