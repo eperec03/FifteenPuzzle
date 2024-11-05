@@ -20,7 +20,24 @@ class Puzzle:
                 if self.initial_state[i][j] == 0:
                     return (i, j)
         return None
-    
+
+    def get_possible_moves(self, empty_tile):
+        """Returns a list of possible moves (L, R, U, D) for the empty tile based on its current position."""
+        row, col = empty_tile
+        moves = []
+        # Definimos las direcciones en un diccionario:
+        directions = {
+            "U": (-1, 0),  # Up
+            "D": (1, 0),   # Down
+            "L": (0, -1),  # Left
+            "R": (0, 1)    # Right
+        }
+        for move, (dr, dc) in directions.items():
+            new_row, new_col = row + dr, col + dc
+            if 0 <= new_row < self.rows and 0 <= new_col < self.cols:
+                moves.append(move)
+        return moves
+
     #Mostramos el estado actual del puzzle
     def display(self):
         for row in self.initial_state:
@@ -37,6 +54,7 @@ class Puzzle:
         empty_row, empty_col = self.empty_tile
         # Intentar hacer el movimiento en lugar de crear un nuevo estado
         if direction == 'L' and empty_col > 0:
+            #intercambiamos
             self.initial_state[empty_row][empty_col], self.initial_state[empty_row][empty_col - 1] = \
                 self.initial_state[empty_row][empty_col - 1], self.initial_state[empty_row][empty_col]
             new_empty_pos = (empty_row, empty_col - 1)
@@ -53,6 +71,7 @@ class Puzzle:
                 self.initial_state[empty_row + 1][empty_col], self.initial_state[empty_row][empty_col]
             new_empty_pos = (empty_row + 1, empty_col)
         else:
+            print('puta')
             return None, None  # Movimiento no válido
 
         # Actualiza la posición del tile vacío
@@ -67,36 +86,43 @@ def bfs(puzzle):
     empty_tile = puzzle.empty_tile
     #queue almacenará los estados del rompecabezas en un momento específico.
     '''deque crea una cola que permite agregar y remover elementos eficientemente desde ambos extremos'''
-    queue = deque([(initial_state, empty_tile, [], None)])  # Agregar el último movimiento
-    visited = set()
-    visited.add(tuple(map(tuple, initial_state)))
+    # queue = deque([(initial_state, empty_tile, [], None)])  # Agregar el último movimiento
 
+    queue = [(initial_state, empty_tile, [], None)]  #utilizaremos esta lista como una pila
+    
+    visited=[]
+    visited.append(initial_state)
+    
     while queue:
-        current_state, (empty_row, empty_col), moves, last_direction = queue.popleft()
+        current_state, current_empty_tile, moves, last_move = queue.pop(0)  # quitamos el primer elemento de la pila
         
         # Depuración: Imprimir el estado actual y los movimientos
         print(f"Estado actual: {current_state}, Movimientos: {moves}")
         if current_state == goal_state:
             return moves
         
-        for direction in ['L', 'R', 'U', 'D']:
-            # Eliminar movimientos inútiles (opuestos)
-            if last_direction is not None and ((last_direction == 'L' and direction == 'R') or
-                                                (last_direction == 'R' and direction == 'L') or
-                                                (last_direction == 'U' and direction == 'D') or
-                                                (last_direction == 'D' and direction == 'U')):
-                continue
-            
+        for direction in puzzle.get_possible_moves(current_empty_tile):
+            # # Eliminar movimientos inútiles (opuestos)
+            # if last_direction is not None and ((last_direction == 'L' and direction == 'R') or
+            #                                     (last_direction == 'R' and direction == 'L') or
+            #                                     (last_direction == 'U' and direction == 'D') or
+            #                                     (last_direction == 'D' and direction == 'U')):
+            #     continue
             new_puzzle = Puzzle([row[:] for row in current_state], goal_state)  # Copia para el nuevo estado
             new_state, new_empty_pos = new_puzzle.move(direction)
             
-            if new_state and tuple(map(tuple, new_state)) not in visited:
-                visited.add(tuple(map(tuple, new_state)))
+            if new_state not in visited:
+                visited.append(new_state)
                 queue.append((new_state, new_empty_pos, moves + [direction], direction))  # Guardar el último movimiento
     return None
     
 def dfs(puzzle):
-    pass
+    initial_state = puzzle.initial_state
+    goal_state = puzzle.goal_state
+    empty_tile = puzzle.empty_tile
+    queue = deque([(initial_state, empty_tile, [], None)])  # Agregar el último movimiento
+    visited = set()
+    visited.add(tuple(map(tuple, initial_state)))
 
 def idfs(puzzle):
     pass
