@@ -5,6 +5,8 @@ import sys
 #Estructura eficiente para manejar colas de doble extremo, usada en algoritmos de búsqueda como BFS.
 from collections import deque
 from queue import Queue
+import heapq  # Para manejar la cola de prioridad en Best-First Search
+
 
 class Puzzle:
     def __init__(self, initial_state, goal_state):
@@ -114,22 +116,33 @@ def dfs(puzzle):
     initial_state = puzzle.initial_state
     goal_state = puzzle.goal_state
     empty_tile = puzzle.empty_tile
-    # queue almacenará los estados del rompecabezas en un momento específico.
-    stack = [(initial_state, empty_tile, [], None)]  #utilizaremos esta lista como una pila
-    visited=[]
+    max_depth = 10  # Límite de profundidad
+
+    # Pila que almacenará los estados del rompecabezas en un momento específico.
+    stack = [(initial_state, empty_tile, [], None)]  # Utilizaremos esta lista como una pila
+    visited = []
     visited.append(initial_state)
+
     while stack:
-        #sacamos el último elemento de la pila, es decirl el último ñadido (deep)
+        # Sacamos el último elemento de la pila (último añadido - LIFO)
         current_state, current_empty_tile, moves, last_move = stack.pop()
+
+        # Depuración: Imprimir el estado actual y los movimientos
         print(f"Estado actual: {current_state}, Movimientos: {moves}")
-        #Depuración: Imprimimir el estado actual y los movimientos
-        print(f"Estado actual: {current_state}, Movimientos: {moves}")
+
+        # Verificar si se alcanzó el estado objetivo
         if current_state == goal_state:
             return moves
+
+        # Si excede el límite de profundidad, continuar con el siguiente estado
+        if len(moves) >= max_depth:
+            continue
+
+        # Generar y explorar movimientos posibles
         for direction in puzzle.get_possible_moves(current_empty_tile):
             new_puzzle = Puzzle([row[:] for row in current_state], goal_state)  # Copia para el nuevo estado
             new_state, new_empty_pos = new_puzzle.move(direction)
-            
+
             if new_state not in visited:
                 visited.append(new_state)
                 stack.append((new_state, new_empty_pos, moves + [direction], direction))  # Guardar el último movimiento
@@ -172,70 +185,61 @@ def idfs(puzzle):
     return None
 
 #Búsquedas informadas
-def manhattan_distance(state):
-    """Calculate the Manhattan distance of the current state from the goal state."""
+def manhattan_distance(state, goal_state):
+    # Aquí pasamos el estado actual y el estado objetivo
     distance = 0
-    for i in range(4):
-        for j in range(4):
-            if state[i][j] != 0:  # Skip the blank tile
+    rows, cols = len(state), len(state[0])
+    for i in range(rows):
+        for j in range(cols):
+            if state[i][j] != 0:  # Ignorar el espacio vacío
                 value = state[i][j]
-                goal_x, goal_y = divmod(value - 1, 4)
+                goal_x, goal_y = divmod(value - 1, cols)
                 distance += abs(i - goal_x) + abs(j - goal_y)
     return distance
 
-# def is_goal(state):
-#     """Check if the current state is the goal state."""
-#     return state == GOAL_STATE
+# Algoritmo Best-First Search
+def best_first_search(puzzle):
+    """Perform a Best-First Search (Greedy Search) to solve the puzzle using a list instead of heapq."""
+    initial_state = puzzle.initial_state
+    goal_state = puzzle.goal_state
+    empty_tile = puzzle.empty_tile
 
-def get_blank_position(state):
-    """Find the position of the blank tile in the puzzle."""
-    for i in range(4):
-        for j in range(4):
-            if state[i][j] == 0:
-                return i, j
+    # Lista que actúa como la cola de prioridad
+    priority_list = [(manhattan_distance(initial_state, goal_state), initial_state, empty_tile, [])]
 
-# def generate_neighbors(state):
-#     """Generate all possible moves from the current state."""
-#     neighbors = []
-#     x, y = get_blank_position(state)
-#     for dx, dy in DIRECTIONS:
-#         new_x, new_y = x + dx, y + dy
-#         if 0 <= new_x < 4 and 0 <= new_y < 4:
-#             # Swap blank tile with the adjacent tile
-#             new_state = [row[:] for row in state]
-#             new_state[x][y], new_state[new_x][new_y] = new_state[new_x][new_y], new_state[x][y]
-#             neighbors.append(new_state)
-#     return neighbors
+    visited = set()  # Para evitar ciclos
 
-# def best_first_search(puzzle):
-#     initial_state = 
-#     """Perform a Best-First Search (Greedy Search) to solve the 15-puzzle."""
-#     priority_queue = []
-#     visited = set()
-#     heapq.heappush(priority_queue, (manhattan_distance(initial_state), initial_state))
+    while priority_list:
+        # Ordenar la lista por heurística (siempre trabajar con el menor costo primero)
+        priority_list.sort(key=lambda x: x[0])  # Ordenar por el primer elemento (heurística)
+        
+        # Sacar el estado con menor heurística
+        heuristic, current_state, current_empty_tile, moves = priority_list.pop(0)
 
-#     while priority_queue:
-#         heuristic, current_state = heapq.heappop(priority_queue)
+        # Depuración: Imprimir el estado actual y su heurística
+        print(f"Heurística: {heuristic}, Estado actual: {current_state}, Movimientos: {moves}")
 
-#         # Check if goal is reached
-#         if is_goal(current_state):
-#             return current_state
+        # Verificar si se alcanzó el estado objetivo
+        if current_state == goal_state:
+            return moves
 
-#         # Avoid revisiting the same state
-#         visited.add(tuple(map(tuple, current_state)))
+        # Marcar el estado actual como visitado
+        visited.add(tuple(map(tuple, current_state)))
 
-#         # Explore neighbors
-#         for neighbor in generate_neighbors(current_state):
-#             neighbor_tuple = tuple(map(tuple, neighbor))
-#             if neighbor_tuple not in visited:
-#                 heapq.heappush(priority_queue, (manhattan_distance(neighbor), neighbor))
-#                 visited.add(neighbor_tuple)
+        # Generar y explorar movimientos posibles
+        for direction in puzzle.get_possible_moves(current_empty_tile):
+            new_puzzle = Puzzle([row[:] for row in current_state], goal_state)
+            new_state, new_empty_pos = new_puzzle.move(direction)
 
-#4 def a_star(puzzle, heuristic):
-#     pass
+            # Evitar estados visitados previamente
+            if tuple(map(tuple, new_state)) not in visited:
+                # Calcular la heurística para el nuevo estado
+                heuristic = manhattan_distance(new_state, goal_state)
+                # Insertar el nuevo estado en la lista
+                priority_list.append((heuristic, new_state, new_empty_pos, moves + [direction]))
 
-# def sma_star(puzzle, heuristic):
-#     pass
+    # Si no se encuentra solución, devolver None
+    return None
 
 # #Funcion para leer el input del rompecabezas
 def read_puzzle():
@@ -268,9 +272,9 @@ def main():
     parser.add_argument('-b', '--bfs', help='Búsqueda en anchura', action='store_true') #tipo booleano--store_true
     parser.add_argument('-d', '--dfs', help='Búsqueda en profundidad', action='store_true')
     parser.add_argument('-i', '--idfs', help='Búsqueda con profundización iterativa', action='store_true')
-    parser.add_argument('-f', '--bf', help='Búsqueda best-first', type=int)
-    parser.add_argument('-a', '--astar', help='Algoritmo A*', type=int)
-    parser.add_argument('-s', '--sma', help='Algoritmo SMA*', type=int)
+    parser.add_argument('-f', '--bf', help='Búsqueda best-first', action='store_true')
+    parser.add_argument('-a', '--astar', help='Algoritmo A*', action='store_true')
+    parser.add_argument('-s', '--sma', help='Algoritmo SMA*', action='store_true')
 
     # Inicializar la variable solution
     solution = None
@@ -286,8 +290,8 @@ def main():
         solution = dfs(puzzle)
     elif args.idfs:
         solution = idfs(puzzle)
-    # elif args.bf is not None:
-    #     solution = best_first_search(puzzle, args.bf)
+    elif args.bf is not None:
+        solution = best_first_search(puzzle)
     # elif args.astar is not None:
     #     solution = a_star(puzzle, args.astar)
         
