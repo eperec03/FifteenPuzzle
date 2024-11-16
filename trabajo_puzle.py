@@ -102,12 +102,6 @@ def bfs(puzzle):
             return moves
         
         for direction in puzzle.get_possible_moves(current_empty_tile):
-            # # Eliminar movimientos inútiles (opuestos)
-            # if last_direction is not None and ((last_direction == 'L' and direction == 'R') or
-            #                                     (last_direction == 'R' and direction == 'L') or
-            #                                     (last_direction == 'U' and direction == 'D') or
-            #                                     (last_direction == 'D' and direction == 'U')):
-            #     continue
             new_puzzle = Puzzle([row[:] for row in current_state], goal_state)  # Copia para el nuevo estado
             new_state, new_empty_pos = new_puzzle.move(direction)
             
@@ -115,29 +109,135 @@ def bfs(puzzle):
                 visited.append(new_state)
                 queue.append((new_state, new_empty_pos, moves + [direction], direction))  # Guardar el último movimiento
     return None
-    
+
 def dfs(puzzle):
     initial_state = puzzle.initial_state
     goal_state = puzzle.goal_state
     empty_tile = puzzle.empty_tile
-    queue = deque([(initial_state, empty_tile, [], None)])  # Agregar el último movimiento
-    visited = set()
-    visited.add(tuple(map(tuple, initial_state)))
+    # queue almacenará los estados del rompecabezas en un momento específico.
+    stack = [(initial_state, empty_tile, [], None)]  #utilizaremos esta lista como una pila
+    visited=[]
+    visited.append(initial_state)
+    while stack:
+        #sacamos el último elemento de la pila, es decirl el último ñadido (deep)
+        current_state, current_empty_tile, moves, last_move = stack.pop()
+        print(f"Estado actual: {current_state}, Movimientos: {moves}")
+        #Depuración: Imprimimir el estado actual y los movimientos
+        print(f"Estado actual: {current_state}, Movimientos: {moves}")
+        if current_state == goal_state:
+            return moves
+        for direction in puzzle.get_possible_moves(current_empty_tile):
+            new_puzzle = Puzzle([row[:] for row in current_state], goal_state)  # Copia para el nuevo estado
+            new_state, new_empty_pos = new_puzzle.move(direction)
+            
+            if new_state not in visited:
+                visited.append(new_state)
+                stack.append((new_state, new_empty_pos, moves + [direction], direction))  # Guardar el último movimiento
+    return None
 
 def idfs(puzzle):
-    pass
+    # Iterar con profundidades crecientes
+    for depth_limit in range(1, sys.maxsize):
+        # Indica que el bucle va a iterar con valores de depth_limit que comienzan en 1 y aumentan indefinidamente (sys.maxsize es el valor entero más grande que Python permite)
+        # Lista de estados visitados para la profundidad actual
+        visited = []
+        stack = [(puzzle.initial_state, puzzle.empty_tile, [], 0)]  # Stack simula la pila de llamadas para DFS
+
+        while stack:
+            state, empty_tile, moves, depth = stack.pop()
+            
+            print(f"Profundidad: {depth}, Estado actual: {state}, Movimientos: {moves}")
+            
+            # Verificar si se alcanzó el objetivo
+            if state == puzzle.goal_state:
+                return moves
+            
+            # Ignorar si el límite de profundidad se ha excedido
+            if depth > depth_limit:
+                continue
+            
+            # Marcar el estado actual como visitado
+            visited.append(state)
+            
+            # Generar nuevos estados moviendo la pieza vacía
+            for direction in puzzle.get_possible_moves(empty_tile):
+                new_puzzle = Puzzle([row[:] for row in state], puzzle.goal_state)
+                new_state, new_empty_pos = new_puzzle.move(direction)
+                
+                # Solo apilar el nuevo estado si no se ha visitado en esta iteración
+                if new_state is not None and new_state not in visited:
+                    stack.append((new_state, new_empty_pos, moves + [direction], depth + 1))
+        
+    # Si no se encontró solución, retorna None
+    return None
 
 #Búsquedas informadas
-def best_first_search(puzzle, heuristic):
-    pass
+def manhattan_distance(state):
+    """Calculate the Manhattan distance of the current state from the goal state."""
+    distance = 0
+    for i in range(4):
+        for j in range(4):
+            if state[i][j] != 0:  # Skip the blank tile
+                value = state[i][j]
+                goal_x, goal_y = divmod(value - 1, 4)
+                distance += abs(i - goal_x) + abs(j - goal_y)
+    return distance
 
-def a_star(puzzle, heuristic):
-    pass
+# def is_goal(state):
+#     """Check if the current state is the goal state."""
+#     return state == GOAL_STATE
 
-def sma_star(puzzle, heuristic):
-    pass
+def get_blank_position(state):
+    """Find the position of the blank tile in the puzzle."""
+    for i in range(4):
+        for j in range(4):
+            if state[i][j] == 0:
+                return i, j
 
-#Funcion para leer el input del rompecabezas
+# def generate_neighbors(state):
+#     """Generate all possible moves from the current state."""
+#     neighbors = []
+#     x, y = get_blank_position(state)
+#     for dx, dy in DIRECTIONS:
+#         new_x, new_y = x + dx, y + dy
+#         if 0 <= new_x < 4 and 0 <= new_y < 4:
+#             # Swap blank tile with the adjacent tile
+#             new_state = [row[:] for row in state]
+#             new_state[x][y], new_state[new_x][new_y] = new_state[new_x][new_y], new_state[x][y]
+#             neighbors.append(new_state)
+#     return neighbors
+
+# def best_first_search(puzzle):
+#     initial_state = 
+#     """Perform a Best-First Search (Greedy Search) to solve the 15-puzzle."""
+#     priority_queue = []
+#     visited = set()
+#     heapq.heappush(priority_queue, (manhattan_distance(initial_state), initial_state))
+
+#     while priority_queue:
+#         heuristic, current_state = heapq.heappop(priority_queue)
+
+#         # Check if goal is reached
+#         if is_goal(current_state):
+#             return current_state
+
+#         # Avoid revisiting the same state
+#         visited.add(tuple(map(tuple, current_state)))
+
+#         # Explore neighbors
+#         for neighbor in generate_neighbors(current_state):
+#             neighbor_tuple = tuple(map(tuple, neighbor))
+#             if neighbor_tuple not in visited:
+#                 heapq.heappush(priority_queue, (manhattan_distance(neighbor), neighbor))
+#                 visited.add(neighbor_tuple)
+
+#4 def a_star(puzzle, heuristic):
+#     pass
+
+# def sma_star(puzzle, heuristic):
+#     pass
+
+# #Funcion para leer el input del rompecabezas
 def read_puzzle():
     #Leer la cantidad de filas y columnas
     rows, cols = map(int, input("Ingrese el número de filas y columnas (ej. 4 4): ").split())
@@ -186,13 +286,13 @@ def main():
         solution = dfs(puzzle)
     elif args.idfs:
         solution = idfs(puzzle)
-    elif args.bf is not None:
-        solution = best_first_search(puzzle, args.bf)
-    elif args.astar is not None:
-        solution = a_star(puzzle, args.astar)
+    # elif args.bf is not None:
+    #     solution = best_first_search(puzzle, args.bf)
+    # elif args.astar is not None:
+    #     solution = a_star(puzzle, args.astar)
         
-    elif args.sma is not None:
-        solution = sma_star(puzzle, args.sma)
+    # elif args.sma is not None:
+    #     solution = sma_star(puzzle, args.sma)
     else:
         print("Debe especificar una estrategia de búsqueda.")
         return
